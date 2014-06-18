@@ -18,12 +18,9 @@ public class AnswerDao {
 		PreparedStatement pstmt = null;
 		try {
 			con = ConnectionManager.getConnection();
-			String sql = "INSERT INTO ANSWERS (writer, contents, createdDate, questionId) VALUES (?, ?, ?, ?)";
+			String sql = createQueryForInsert();
 			pstmt = con.prepareStatement(sql);
-			pstmt.setString(1, answer.getWriter());
-			pstmt.setString(2, answer.getContents());
-			pstmt.setTimestamp(3, new Timestamp(answer.getTimeFromCreateDate()));
-			pstmt.setLong(4, answer.getQuestionId());
+			setValuesForInsert(answer, pstmt);
 			pstmt.executeUpdate();
 		} finally {
 			if (pstmt != null) {
@@ -36,6 +33,20 @@ public class AnswerDao {
 		}		
 	}
 
+	void setValuesForInsert(Answer answer, PreparedStatement pstmt)
+			throws SQLException {
+		pstmt.setString(1, answer.getWriter());
+		pstmt.setString(2, answer.getContents());
+		pstmt.setTimestamp(3, new Timestamp(answer.getTimeFromCreateDate()));
+		pstmt.setLong(4, answer.getQuestionId());
+	}
+
+	String createQueryForInsert() {
+		String sql = "INSERT INTO ANSWERS (writer, contents, createdDate, questionId) VALUES (?, ?, ?, ?)";
+		return sql;
+	}
+	
+	
 	public List<Answer> findAllByQuestionId(long questionId) throws SQLException {
 		Connection con = null;
 		PreparedStatement pstmt = null;

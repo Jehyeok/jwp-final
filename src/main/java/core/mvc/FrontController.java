@@ -30,15 +30,19 @@ public class FrontController extends HttpServlet {
 			throws ServletException, IOException {
 		String requestUri = req.getRequestURI();
 		logger.debug("Method : {}, Request URI : {}", req.getMethod(), requestUri);
-		
 		Controller controller = rm.findController(urlExceptParameter(req.getRequestURI()));
+		logger.debug("controller: {}", controller);
 		String viewName;
 		try {
 			viewName = controller.execute(req, resp);
 		} catch (Exception e) {
 			throw new ServletException(e.getMessage());
 		}
-		movePage(req, resp, viewName);
+		
+		logger.debug("viewName: {}", viewName);
+		if (!"ajax".equals(viewName)) {
+			movePage(req, resp, viewName);
+		}
 	}
 
 	void movePage(HttpServletRequest req, HttpServletResponse resp,

@@ -18,13 +18,34 @@
 		<servlet-name>FrontController</servlet-name>
 		<servlet-class>core.mvc.FrontController</servlet-class>
 	</servlet>
+	<servlet>
+		<description>
+		</description>
+		<display-name>QuestionController</display-name>
+		<servlet-name>QuestionController</servlet-name>
+		<servlet-class>next.controller.QuestionController</servlet-class>
+	</servlet>
 
 	<servlet-mapping>
 		<servlet-name>FrontController</servlet-name>
 		<url-pattern>*.next</url-pattern>
 	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>QuestionController</servlet-name>
+		<url-pattern>/QuestionController</url-pattern>
+	</servlet-mapping>
 	
 	<welcome-file-list>
 		<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>
+	
+	<filter>
+		<filter-name>CharacterEncodingFilter</filter-name>
+		<filter-class>core.web.filter.CharacterEncodingFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>CharacterEncodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
 </web-app>

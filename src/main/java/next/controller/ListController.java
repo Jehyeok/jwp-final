@@ -16,7 +16,9 @@ public class ListController implements Controller {
 	@Override
 	public String execute(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
-		questions = questionDao.findAll();
+		synchronized (questionDao) {
+			questions = questionDao.findAll();
+		}
 		request.setAttribute("questions", questions);
 		return "list.jsp";
 	}

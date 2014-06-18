@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 
 import next.model.Question;
@@ -13,105 +12,100 @@ import next.support.db.ConnectionManager;
 
 public class QuestionDao {
 
-	public void insert(Question question) throws SQLException {
+	public void insert(final Question question) throws SQLException {
 		Connection con = null;
-		PreparedStatement pstmt = null;
-		try {
-			con = ConnectionManager.getConnection();
-			String sql = "INSERT INTO QUESTIONS (writer, title, contents, createdDate, countOfComment) VALUES (?, ?, ?, ?, ?)";
-			pstmt = con.prepareStatement(sql);
-			pstmt.setString(1, question.getWriter());
-			pstmt.setString(2, question.getTitle());
-			pstmt.setString(3, question.getContents());
-			pstmt.setTimestamp(4, new Timestamp(question.getTimeFromCreateDate()));
-			pstmt.setInt(5, question.getCountOfComment());
+		con = ConnectionManager.getConnection();
+		
+		UpdateJdbcTemplate template = new UpdateJdbcTemplate(con) {
 
-			pstmt.executeUpdate();
-		} finally {
-			if (pstmt != null) {
-				pstmt.close();
+			@Override
+			void setValues(PreparedStatement pstmt) throws SQLException {
+				pstmt.setString(1, question.getWriter());
+				pstmt.setString(2, question.getTitle());
+				pstmt.setString(3, question.getContents());
+				pstmt.setTimestamp(4, new Timestamp(question.getTimeFromCreateDate()));
+				pstmt.setInt(5, question.getCountOfComment());
 			}
+		};
+		
+		String sql = "INSERT INTO QUESTIONS (writer, title, contents, createdDate, countOfComment) VALUES (?, ?, ?, ?, ?)";
+		template.insert(question, sql);
+	}
+	
+	public void update(final Question question) throws SQLException {
+		Connection con = null;
+		con = ConnectionManager.getConnection();
+		
+		UpdateJdbcTemplate template = new UpdateJdbcTemplate(con){
 
-			if (con != null) {
-				con.close();
+			@Override
+			void setValues(PreparedStatement pstmt)
+					throws SQLException {
+				pstmt.setInt(1, question.getCountOfComment());
+				pstmt.setTimestamp(2, new Timestamp(question.getTimeFromCreateDate()));
+				pstmt.setLong(3, question.getQuestionId());
 			}
-		}		
+		};
+		String sql = "UPDATE QUESTIONS SET countOfComment = ?, createdDate = ? WHERE questionId = ?";
+		template.update(question, sql);
 	}
 
 	public List<Question> findAll() throws SQLException {
 		Connection con = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try {
-			con = ConnectionManager.getConnection();
-			String sql = "SELECT questionId, writer, title, createdDate, countOfComment FROM QUESTIONS " + 
-					"order by questionId desc";
-			pstmt = con.prepareStatement(sql);
+		con = ConnectionManager.getConnection();
+		RowMapperForList rm = new RowMapperForList() {
 
-			rs = pstmt.executeQuery();
-
-			List<Question> questions = new ArrayList<Question>();
-			Question question = null;
-			while (rs.next()) {
-				question = new Question(
-						rs.getLong("questionId"),
-						rs.getString("writer"),
-						rs.getString("title"),
-						null,
+			@Override
+			public void mapRow(ResultSet rs, List<Question> questions)
+					throws SQLException {
+				Question question;
+				question = new Question(rs.getLong("questionId"),
+						rs.getString("writer"), rs.getString("title"), null,
 						rs.getTimestamp("createdDate"),
 						rs.getInt("countOfComment"));
 				questions.add(question);
 			}
-
-			return questions;
-		} finally {
-			if (rs != null) {
-				rs.close();
-			}
-			if (pstmt != null) {
-				pstmt.close();
-			}
-			if (con != null) {
-				con.close();
-			}
-		}
+		};
+		
+		SelectJdbcTemplate template = new SelectJdbcTemplate(con) {
+			
+			@Override
+			void setValues(PreparedStatement pstmt) throws SQLException {}
+		};
+		String sql = "SELECT questionId, writer, title, createdDate, countOfComment FROM QUESTIONS "
+				+ "order by questionId desc";
+		return template.findAll(sql, rm);
 	}
 
-	public Question findById(long questionId) throws SQLException {
+	public Question findById(final long questionId) throws SQLException {
 		Connection con = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try {
-			con = ConnectionManager.getConnection();
-			String sql = "SELECT questionId, writer, title, contents, createdDate, countOfComment FROM QUESTIONS " + 
-					"WHERE questionId = ?";
-			pstmt = con.prepareStatement(sql);
-			pstmt.setLong(1, questionId);
-
-			rs = pstmt.executeQuery();
-
-			Question question = null;
-			if (rs.next()) {
-				question = new Question(
-						rs.getLong("questionId"),
-						rs.getString("writer"),
-						rs.getString("title"),
+		con = ConnectionManager.getConnection();
+		
+		RowMapperForOneRecord rm = new RowMapperForOneRecord() {
+			
+			@Override
+			public Question mapRow(ResultSet rs) throws SQLException {
+				Question question;
+				question = new Question(rs.getLong("questionId"),
+						rs.getString("writer"), rs.getString("title"),
 						rs.getString("contents"),
 						rs.getTimestamp("createdDate"),
 						rs.getInt("countOfComment"));
+				return question;
+			}
+		};
+		
+		SelectJdbcTemplate template = new SelectJdbcTemplate(con) {
+			
+			@Override
+			void setValues(PreparedStatement pstmt)
+					throws SQLException {
+				pstmt.setLong(1, questionId);
 			}
 
-			return question;
-		} finally {
-			if (rs != null) {
-				rs.close();
-			}
-			if (pstmt != null) {
-				pstmt.close();
-			}
-			if (con != null) {
-				con.close();
-			}
-		}
+		};
+		String sql = "SELECT questionId, writer, title, contents, createdDate, countOfComment FROM QUESTIONS "
+				+ "WHERE questionId = ?";
+		return template.findById(sql, rm);
 	}
 }

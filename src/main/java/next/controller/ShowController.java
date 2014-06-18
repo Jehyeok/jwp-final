@@ -21,8 +21,12 @@ public class ShowController implements Controller {
 	public String execute(HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		long questionId = Long.parseLong(request.getParameter("questionId"));
-		question = questionDao.findById(questionId);
-		answers = answerDao.findAllByQuestionId(questionId);
+		
+		synchronized(questionDao) {
+			question = questionDao.findById(questionId);
+			answers = answerDao.findAllByQuestionId(questionId);
+		}
+		
 		request.setAttribute("question", question);
 		request.setAttribute("answers", answers);
 		return "show.jsp";

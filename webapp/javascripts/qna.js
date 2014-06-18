@@ -14,9 +14,30 @@ function writeAnswers(e) {
 	 request.open("POST", url, true);
 	 request.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 	 
-	 request.onreadystatechange = function() {
+	 request.onreadystatechange = function(obj) {
 		 if(request.readyState == 4 && request.status == 200) {
-			 location.reload(true);
+			 // 응답 데이터 받아옴
+			 var responseText = obj.target.responseText;
+			 var parsedResponseText = JSON.parse(responseText);
+			 
+			 var commentsDiv = document.querySelector('.comments');
+			 var comments = document.querySelectorAll('.comment');
+			 var commentDiv = document.createElement('div');
+			 commentDiv.className = "comment";
+			 
+			 commentDiv.innerHTML = '<div class="comment-metadata">' +
+             						'<span class="comment-author">' + parsedResponseText.writer + ',' + '</span>' +
+             						'<span class="comment-date">' + parsedResponseText.createdDate + '</span>' +
+             						'</div>' +
+             						'<div class="comment-content">' + '<div class="about">내용 : </div>' + 
+             						parsedResponseText.contents +
+             						'</div>';
+             						
+             commentsDiv.insertBefore(commentDiv, comments[0]);
+             
+             // 댓글 수 업데이트
+             var countOfComment = parseInt(commentsDiv.querySelector('h3').innerText.split(':')[1], 10);
+             commentsDiv.querySelector('h3').innerText = "댓글 수 : " + ++countOfComment;
 		 }
 	 }
 	 
