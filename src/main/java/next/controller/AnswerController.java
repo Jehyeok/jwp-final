@@ -43,7 +43,7 @@ public class AnswerController implements Controller {
 		
 		response.getWriter().write(answerAsJson);
 		
-		return "ajax";
+		return "not forward";
 	}
 	
 }

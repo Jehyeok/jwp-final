@@ -32,7 +32,7 @@ public class JsonAPIController implements Controller {
 		
 		PrintWriter out = response.getWriter();
 		out.print(questionsAsJson);
-		return "ajax";
+		return "not forward";
 	}
 
 }

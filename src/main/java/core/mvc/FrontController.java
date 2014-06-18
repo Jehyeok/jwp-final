@@ -40,7 +40,7 @@ public class FrontController extends HttpServlet {
 		}
 		
 		logger.debug("viewName: {}", viewName);
-		if (!"ajax".equals(viewName)) {
+		if (!"not forward".equals(viewName)) {
 			movePage(req, resp, viewName);
 		}
 	}

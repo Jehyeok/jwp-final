@@ -20,7 +20,6 @@ public class QuestionController implements Controller {
 		
 		Question question = new Question(writer, title, contents);
 		questionDao.insert(question);
-		System.out.println("QuestionController call");
 		return "redirect:/list.next";
 	}
 	
